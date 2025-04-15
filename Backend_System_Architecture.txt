@@ -1,0 +1,371 @@
+// Backend System Architecture for Car Parts Inventory Platform
+
+/**
+ * DATABASE SCHEMA
+ * ---------------
+ * Below is the proposed database schema for the car parts inventory system.
+ */
+
+// 1. Vehicles Table
+const vehicleSchema = {
+  id: "UUID, primary key",
+  year: "INTEGER, not null",
+  make: "VARCHAR(50), not null",  
+  model: "VARCHAR(100), not null",
+  vin: "VARCHAR(17), unique, not null",
+  purchaseDate: "DATE, not null",
+  purchasePrice: "DECIMAL(10,2), not null",
+  damageLocation: "VARCHAR(50), not null", // e.g., 'Front Right', 'Rear Left', etc.
+  status: "ENUM('dismantling', 'active', 'sold_out'), default 'dismantling'",
+  totalRevenue: "DECIMAL(10,2), default 0",
+  dateAdded: "TIMESTAMP, default CURRENT_TIMESTAMP",
+  notes: "TEXT",
+};
+
+// 2. Parts Categories Table
+const categorySchema = {
+  id: "UUID, primary key",
+  name: "VARCHAR(100), not null", // e.g., 'Body', 'Electrical', 'Mechanical', 'Interior'
+  description: "TEXT",
+};
+
+// 3. Parts Subcategories Table
+const subcategorySchema = {
+  id: "UUID, primary key",
+  categoryId: "UUID, foreign key references categories(id)",
+  name: "VARCHAR(100), not null", // e.g., 'Doors', 'Bumpers', 'Lights', 'Engine Components'
+  description: "TEXT",
+};
+
+// 4. Parts Table
+const partSchema = {
+  id: "UUID, primary key",
+  vehicleId: "UUID, foreign key references vehicles(id)",
+  subcategoryId: "UUID, foreign key references subcategories(id)",
+  name: "VARCHAR(100), not null", // e.g., 'Front Left Door', 'Engine', 'Transmission'
+  location: "VARCHAR(50)", // e.g., 'Front Left', 'Front Right', 'Rear', etc.
+  condition: "VARCHAR(50)", // e.g., 'Excellent', 'Good', 'Fair'
+  price: "DECIMAL(10,2), not null",
+  status: "ENUM('available', 'sold', 'damaged'), default 'available'",
+  dateListed: "TIMESTAMP, default CURRENT_TIMESTAMP",
+  dateSold: "TIMESTAMP, null",
+  salePrice: "DECIMAL(10,2), null", // May differ from listed price if negotiated
+  notes: "TEXT",
+};
+
+// 5. Sales Table
+const saleSchema = {
+  id: "UUID, primary key",
+  partId: "UUID, foreign key references parts(id)",
+  saleDate: "TIMESTAMP, default CURRENT_TIMESTAMP",
+  salePrice: "DECIMAL(10,2), not null",
+  customerInfo: "TEXT", // Optional customer information
+  paymentMethod: "VARCHAR(50)",
+  notes: "TEXT",
+};
+
+/**
+ * CORE FUNCTIONS
+ * -------------
+ * These functions represent the key business logic for the platform.
+ */
+
+// Add a new vehicle to inventory
+function addVehicle(vehicleData) {
+  // 1. Insert vehicle record
+  const vehicleId = db.insert('vehicles', vehicleData);
+  
+  // 2. Generate parts based on vehicle make/model/year
+  const partsTemplate = getPartsTemplate(vehicleData.make, vehicleData.model, vehicleData.year);
+  
+  // 3. Create part entries for each potential part
+  for (const part of partsTemplate) {
+    // Check if part is in damaged area
+    const isDamaged = isPartInDamagedArea(part.location, vehicleData.damageLocation);
+    
+    db.insert('parts', {
+      vehicleId: vehicleId,
+      subcategoryId: part.subcategoryId,
+      name: part.name,
+      location: part.location,
+      condition: 'Good', // Default condition
+      price: part.recommendedPrice,
+      status: isDamaged ? 'damaged' : 'available',
+      notes: isDamaged ? 'Excluded due to damage location' : '',
+    });
+  }
+  
+  return vehicleId;
+}
+
+// Determine if a part is in a damaged area
+function isPartInDamagedArea(partLocation, damageLocation) {
+  // Map of damage locations to affected part locations
+  const damageMap = {
+    'Front Left': ['Front Left', 'Front', 'Left'],
+    'Front Right': ['Front Right', 'Front', 'Right'],
+    'Front Center': ['Front', 'Front Center'],
+    'Rear Left': ['Rear Left', 'Rear', 'Left'],
+    'Rear Right': ['Rear Right', 'Rear', 'Right'],
+    'Rear Center': ['Rear', 'Rear Center'],
+    'Left Side': ['Left', 'Front Left', 'Rear Left'],
+    'Right Side': ['Right', 'Front Right', 'Rear Right'],
+    'Roof': ['Roof', 'Top'],
+    'Undercarriage': ['Bottom', 'Undercarriage'],
+    'Multiple': [] // Special handling required
+  };
+  
+  // If damage location is 'Multiple', we would need more specific details
+  if (damageLocation === 'Multiple') {
+    // In this case, we might have an array of specific damaged areas
+    // This would require additional logic based on your specific requirements
+    return false;
+  }
+  
+  // Check if the part location is in the affected areas for the damage location
+  return damageMap[damageLocation].includes(partLocation);
+}
+
+// Mark a part as sold and update relevant records
+function sellPart(partId, salePrice, customerInfo = null, paymentMethod = null) {
+  // 1. Update part status
+  db.update('parts', partId, {
+    status: 'sold',
+    dateSold: new Date(),
+    salePrice: salePrice
+  });
+  
+  // 2. Record the sale
+  db.insert('sales', {
+    partId: partId,
+    salePrice: salePrice,
+    customerInfo: customerInfo,
+    paymentMethod: paymentMethod
+  });
+  
+  // 3. Update vehicle total revenue
+  const part = db.get('parts', partId);
+  const currentRevenue = db.get('vehicles', part.vehicleId).totalRevenue;
+  db.update('vehicles', part.vehicleId, {
+    totalRevenue: currentRevenue + salePrice
+  });
+  
+  // 4. Check if all parts from the vehicle are sold or damaged
+  const remainingParts = db.query(
+    'SELECT COUNT(*) FROM parts WHERE vehicleId = ? AND status = "available"',
+    [part.vehicleId]
+  );
+  
+  if (remainingParts === 0) {
+    // All parts sold or damaged, update vehicle status
+    db.update('vehicles', part.vehicleId, {
+      status: 'sold_out'
+    });
+  }
+  
+  return true;
+}
+
+// Search for parts based on criteria
+function searchParts(criteria) {
+  // Build query based on search criteria
+  let query = `
+    SELECT p.*, v.year, v.make, v.model, s.name as subcategory, c.name as category
+    FROM parts p
+    JOIN vehicles v ON p.vehicleId = v.id
+    JOIN subcategories s ON p.subcategoryId = s.id
+    JOIN categories c ON s.categoryId = c.id
+    WHERE p.status = 'available'
+  `;
+  
+  const params = [];
+  
+  // Add search filters
+  if (criteria.year) {
+    query += " AND v.year = ?";
+    params.push(criteria.year);
+  }
+  
+  if (criteria.make) {
+    query += " AND v.make = ?";
+    params.push(criteria.make);
+  }
+  
+  if (criteria.model) {
+    query += " AND v.model LIKE ?";
+    params.push(`%${criteria.model}%`);
+  }
+  
+  if (criteria.category) {
+    query += " AND c.name = ?";
+    params.push(criteria.category);
+  }
+  
+  if (criteria.subcategory) {
+    query += " AND s.name = ?";
+    params.push(criteria.subcategory);
+  }
+  
+  if (criteria.partName) {
+    query += " AND p.name LIKE ?";
+    params.push(`%${criteria.partName}%`);
+  }
+  
+  // Execute query
+  return db.query(query, params);
+}
+
+// Generate sales and inventory reports
+function generateReport(reportType, startDate, endDate) {
+  let report = {};
+  
+  switch (reportType) {
+    case 'sales':
+      // Sales report
+      report = {
+        totalSales: db.query(
+          'SELECT COUNT(*), SUM(salePrice) FROM sales WHERE saleDate BETWEEN ? AND ?', 
+          [startDate, endDate]
+        ),
+        salesByCategory: db.query(
+          `SELECT c.name, COUNT(*) as count, SUM(s.salePrice) as total
+           FROM sales s
+           JOIN parts p ON s.partId = p.id
+           JOIN subcategories sc ON p.subcategoryId = sc.id
+           JOIN categories c ON sc.categoryId = c.id
+           WHERE s.saleDate BETWEEN ? AND ?
+           GROUP BY c.name`,
+          [startDate, endDate]
+        ),
+        topSellingParts: db.query(
+          `SELECT p.name, COUNT(*) as count, SUM(s.salePrice) as total
+           FROM sales s
+           JOIN parts p ON s.partId = p.id
+           WHERE s.saleDate BETWEEN ? AND ?
+           GROUP BY p.name
+           ORDER BY count DESC
+           LIMIT 10`,
+          [startDate, endDate]
+        )
+      };
+      break;
+    
+    case 'inventory':
+      // Inventory report
+      report = {
+        totalVehicles: db.query(
+          'SELECT COUNT(*) FROM vehicles WHERE dateAdded BETWEEN ? AND ?',
+          [startDate, endDate]
+        ),
+        availableParts: db.query(
+          'SELECT COUNT(*) FROM parts WHERE status = "available"'
+        ),
+        partsByCategory: db.query(
+          `SELECT c.name, COUNT(*) as count
+           FROM parts p
+           JOIN subcategories sc ON p.subcategoryId = sc.id
+           JOIN categories c ON sc.categoryId = c.id
+           WHERE p.status = "available"
+           GROUP BY c.name`
+        ),
+        vehiclesByStatus: db.query(
+          'SELECT status, COUNT(*) as count FROM vehicles GROUP BY status'
+        )
+      };
+      break;
+      
+    case 'revenue':
+      // Revenue report
+      report = {
+        totalRevenue: db.query(
+          'SELECT SUM(totalRevenue) FROM vehicles'
+        ),
+        revenueByVehicle: db.query(
+          `SELECT id, year, make, model, totalRevenue,
+           (totalRevenue - purchasePrice) as profit,
+           ((totalRevenue - purchasePrice) / purchasePrice * 100) as roi
+           FROM vehicles
+           WHERE totalRevenue > 0
+           ORDER BY roi DESC`
+        ),
+        revenueByMonth: db.query(
+          `SELECT 
+            strftime('%Y-%m', s.saleDate) as month,
+            SUM(s.salePrice) as revenue
+           FROM sales s
+           WHERE s.saleDate BETWEEN ? AND ?
+           GROUP BY month
+           ORDER BY month`,
+          [startDate, endDate]
+        )
+      };
+      break;
+  }
+  
+  return report;
+}
+
+/**
+ * API ENDPOINTS
+ * ------------
+ * These represent the API endpoints that would be exposed by the backend.
+ */
+
+// API Routes
+const apiRoutes = {
+  // Vehicle endpoints
+  'POST /api/vehicles': 'addVehicle',
+  'GET /api/vehicles': 'getAllVehicles',
+  'GET /api/vehicles/:id': 'getVehicleById',
+  'PUT /api/vehicles/:id': 'updateVehicle',
+  'DELETE /api/vehicles/:id': 'deleteVehicle',
+  
+  // Parts endpoints
+  'GET /api/parts': 'getAllParts',
+  'GET /api/parts/search': 'searchParts',
+  'GET /api/parts/:id': 'getPartById',
+  'PUT /api/parts/:id': 'updatePart',
+  'POST /api/parts/:id/sell': 'sellPart',
+  
+  // Categories and subcategories
+  'GET /api/categories': 'getAllCategories',
+  'GET /api/categories/:id/subcategories': 'getSubcategoriesByCategoryId',
+  
+  // Reports
+  'GET /api/reports/sales': 'getSalesReport',
+  'GET /api/reports/inventory': 'getInventoryReport',
+  'GET /api/reports/revenue': 'getRevenueReport',
+  
+  // Search
+  'GET /api/search/year': 'getAvailableYears',
+  'GET /api/search/make': 'getAvailableMakes',
+  'GET /api/search/model': 'getAvailableModels',
+  'GET /api/search/parts': 'getAvailableParts',
+};
+
+/**
+ * IMPLEMENTATION NOTES
+ * -------------------
+ * 
+ * 1. Database Options:
+ *    - For small to medium scale: SQLite or PostgreSQL
+ *    - For larger scale: MySQL or PostgreSQL with proper indexing
+ * 
+ * 2. Backend Framework Options:
+ *    - Node.js with Express
+ *    - Python with Flask or Django
+ *    - Ruby on Rails
+ * 
+ * 3. Authentication:
+ *    - JWT-based authentication for admin access
+ *    - Public/restricted access for customer-facing search
+ * 
+ * 4. Deployment:
+ *    - Docker containers for easy deployment
+ *    - Cloud hosting (AWS, Google Cloud, or Azure)
+ * 
+ * 5. Future Expansion:
+ *    - Image handling with cloud storage
+ *    - API integration with eBay, Facebook Marketplace
+ *    - Barcode scanning integration
+ */

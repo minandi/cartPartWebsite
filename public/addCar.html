@@ -224,7 +224,7 @@
                 <div class="form-group">
                     <label for="vin">Vehicle Identification Number (VIN)</label>
                     <div class="vin-container">
-                        <input type="text" id="vin" name="vin" required placeholder="Enter VIN number" maxlength="17">
+                        <input type="text" id="vin" name="vin" placeholder="Enter VIN number" maxlength="17">
                         <button type="button" id="vin-lookup-btn" class="vin-lookup-btn">Lookup</button>
                     </div>
                     <div class="vin-error" id="vin-error">Please enter a valid 17-character VIN.</div>
@@ -453,7 +453,6 @@
             
             // Validate form
             const requiredFields = [
-                { field: vinInput, name: 'VIN' },
                 { field: yearInput, name: 'Year' },
                 { field: makeInput, name: 'Make' },
                 { field: modelInput, name: 'Model' },

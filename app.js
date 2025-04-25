@@ -3,7 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const db = require('./db'); // Import the database module
-const fetch = require('node-fetch'); // For making HTTP requests
+
+// Fix for the node-fetch import issue
+// Remove this line since it's causing the "already declared" error:
+// const fetch = require('node-fetch');
+
+// And replace with this dynamic import approach:
+const fetchData = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 // Create Express app
 const app = express();
@@ -126,7 +132,7 @@ app.get('/api/vin/:vin', async (req, res) => {
     
     // If not in database, call the NHTSA API
     const apiUrl = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`;
-    const response = await fetch(apiUrl);
+    const response = await fetchData(apiUrl); // Use fetchData instead of fetch
     
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
@@ -165,6 +171,29 @@ app.get('/api/vin/:vin', async (req, res) => {
       error: err.message || 'Failed to lookup VIN', 
       success: false 
     });
+  }
+});
+
+// External API endpoints for makes and models
+app.get('/api/external/makes', async (req, res) => {
+  try {
+    const response = await fetchData('https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=json');
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Error fetching makes:', err);
+    res.status(500).json({ error: 'Error fetching data from external API' });
+  }
+});
+
+app.get('/api/external/models/:make', async (req, res) => {
+  try {
+    const response = await fetchData(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${req.params.make}?format=json`);
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Error fetching models:', err);
+    res.status(500).json({ error: 'Error fetching data from external API' });
   }
 });
 

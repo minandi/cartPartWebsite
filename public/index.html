@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Parts Finder</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Style for the logo */
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        /* Style for the link inside the logo */
+        .logo a {
+            color: white;           /* Same color as your original logo */
+            text-decoration: none;  /* Remove the underline */
+            transition: color 0.3s; /* Optional: smooth transition for hover effects */
+        }
+
+        /* Optional: style for hover state */
+        .logo a:hover {
+            color: var(--secondary-color); /* Use your secondary color variable */
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0;
+        }
+        
+        nav li {
+            margin-right: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .search-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 16px;
+        }
+        
+        /* Make all form controls the same width */
+        select, 
+        .searchable-select-wrapper,
+        .searchable-select-wrapper input {
+            width: 100%;
+            box-sizing: border-box; /* This is important - includes padding in width calculation */
+        }
+
+        /* Ensure the wrapper takes full width of its container */
+        .form-group {
+            width: 100%;
+        }
+        
+        .searchable-dropdown {
+            position: absolute;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            z-index: 10;
+            display: none;
+        }
+        
+        .searchable-dropdown-item {
+            padding: 10px 12px;
+            cursor: pointer;
+        }
+        
+        .searchable-dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .dropdown-category-header {
+            padding: 8px 12px;
+            background-color: #f5f5f5;
+            font-weight: bold;
+            color: #555;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .search-btn {
+            grid-column: 1 / -1;
+        }
+        
+        .vin-lookup {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        
+        .vin-lookup button {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .vin-lookup button img {
+            margin-right: 8px;
+            width: 20px;
+            height: 20px;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        html, body {
+    height: 100%;
+        }
+
+        body {
+    display: flex;
+    flex-direction: column;
+        }
+
+        main {
+    flex: 1;
+        }    
+
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <h1 class="logo"><a href="index.html">Auto Parts Finder</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="inventory.html">Inventory</a></li>
+                    <li><a href="addCar.html">Add Car</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="search-container">
+            <h2 class="search-title">Find Available Part for a Vehicle</h2>
+            <h3 class="search-title">Please Insert Vehicle information</h3>
+            <form class="search-form">
+                <div class="form-group">
+                    <label for="year">Select Year</label>
+                    <select id="year" name="year" required>
+                        <option value="" disabled selected>Select Year</option>
+                        <!-- Years will be populated dynamically -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="make-search">Select Make</label>
+                    <div class="searchable-select-wrapper">
+                        <input type="text" id="make-search" placeholder="Type to search makes..." autocomplete="off">
+                        <input type="hidden" id="make" name="make" required>
+                        <div id="make-dropdown" class="searchable-dropdown"></div>
+                    </div>
+                </div>
+                  
+                <div class="form-group">
+                    <label for="model-search">Select Model</label>
+                    <div class="searchable-select-wrapper">
+                        <input type="text" id="model-search" placeholder="Type to search models..." autocomplete="off">
+                        <input type="hidden" id="model" name="model" required>
+                        <div id="model-dropdown" class="searchable-dropdown"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="part-search">Select Part</label>
+                    <div class="searchable-select-wrapper">
+                        <input type="text" id="part-search" placeholder="Type to search parts..." autocomplete="off">
+                        <input type="hidden" id="part" name="part" required>
+                        <div id="part-dropdown" class="searchable-dropdown"></div>
+                    </div>
+                </div>
+                
+                <div class="search-btn">
+                    <button type="submit" class="btn">Check Availability</button>
+                </div>
+            </form>
+            
+            <div class="vin-lookup">
+                <button>
+                    VIN Lookup
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Auto Parts Finder. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Auto Parts data structure
+        const autoPartsData = [
+            // BODY PARTS
+            { id: 'bumper-front', name: 'Bumper (Front)', category: 'Body Parts' },
+            { id: 'bumper-rear', name: 'Bumper (Rear)', category: 'Body Parts' },
+            { id: 'bumper-cover-front', name: 'Bumper Cover (Front)', category: 'Body Parts' },
+            { id: 'bumper-cover-rear', name: 'Bumper Cover (Rear)', category: 'Body Parts' },
+            { id: 'bumper-reinforcement', name: 'Bumper Reinforcement', category: 'Body Parts' },
+            { id: 'door-front-left', name: 'Door (Front Left)', category: 'Body Parts' },
+            { id: 'door-front-right', name: 'Door (Front Right)', category: 'Body Parts' },
+            { id: 'door-rear-left', name: 'Door (Rear Left)', category: 'Body Parts' },
+            { id: 'door-rear-right', name: 'Door (Rear Right)', category: 'Body Parts' },
+            { id: 'door-handle-exterior', name: 'Door Handle (Exterior)', category: 'Body Parts' },
+            { id: 'door-window-regulator', name: 'Door Window Regulator', category: 'Body Parts' },
+            { id: 'fender-left', name: 'Fender (Left)', category: 'Body Parts' },
+            { id: 'fender-right', name: 'Fender (Right)', category: 'Body Parts' },
+            { id: 'hood', name: 'Hood', category: 'Body Parts' },
+            { id: 'trunk-lid', name: 'Trunk Lid', category: 'Body Parts' },
+            
+            // LIGHTING & ELECTRICAL
+            { id: 'headlight-left', name: 'Headlight Assembly (Left)', category: 'Lighting & Electrical' },
+            { id: 'headlight-right', name: 'Headlight Assembly (Right)', category: 'Lighting & Electrical' },
+            { id: 'headlight-bulb', name: 'Headlight Bulb', category: 'Lighting & Electrical' },
+            { id: 'taillight-left', name: 'Taillight Assembly (Left)', category: 'Lighting & Electrical' },
+            { id: 'taillight-right', name: 'Taillight Assembly (Right)', category: 'Lighting & Electrical' },
+            { id: 'taillight-bulb', name: 'Taillight Bulb', category: 'Lighting & Electrical' },
+            { id: 'alternator', name: 'Alternator', category: 'Lighting & Electrical' },
+            { id: 'starter', name: 'Starter', category: 'Lighting & Electrical' },
+            { id: 'battery', name: 'Battery', category: 'Lighting & Electrical' },
+            
+            // ENGINE
+            { id: 'engine-assembly', name: 'Engine Assembly', category: 'Engine' },
+            { id: 'radiator', name: 'Radiator', category: 'Engine' },
+            { id: 'cooling-fan', name: 'Cooling Fan', category: 'Engine' },
+            { id: 'water-pump', name: 'Water Pump', category: 'Engine' },
+            { id: 'fuel-pump', name: 'Fuel Pump', category: 'Engine' },
+            { id: 'fuel-tank', name: 'Fuel Tank', category: 'Engine' },
+            { id: 'fuel-injector', name: 'Fuel Injector', category: 'Engine' },
+            
+            // TRANSMISSION & DRIVETRAIN
+            { id: 'transmission-assembly-auto', name: 'Transmission Assembly (Automatic)', category: 'Transmission & Drivetrain' },
+            { id: 'transmission-assembly-manual', name: 'Transmission Assembly (Manual)', category: 'Transmission & Drivetrain' },
+            { id: 'axle-shaft', name: 'Axle Shaft', category: 'Transmission & Drivetrain' },
+            { id: 'cv-axle', name: 'CV Axle', category: 'Transmission & Drivetrain' },
+            
+            // INTERIOR
+            { id: 'seat-front-left', name: 'Seat (Front Left)', category: 'Interior' },
+            { id: 'seat-front-right', name: 'Seat (Front Right)', category: 'Interior' },
+            { id: 'seat-rear', name: 'Seat (Rear)', category: 'Interior' },
+            { id: 'radio', name: 'Radio/Stereo', category: 'Interior' },
+            { id: 'speaker', name: 'Speaker', category: 'Interior' },
+            { id: 'navigation-unit', name: 'Navigation Unit', category: 'Interior' },
+            
+            // SUSPENSION & STEERING
+            { id: 'strut', name: 'Strut', category: 'Suspension & Steering' },
+            { id: 'shock-absorber', name: 'Shock Absorber', category: 'Suspension & Steering' },
+            { id: 'control-arm', name: 'Control Arm', category: 'Suspension & Steering' },
+            { id: 'steering-rack', name: 'Steering Rack', category: 'Suspension & Steering' },
+            
+            // BRAKES
+            { id: 'brake-caliper', name: 'Brake Caliper', category: 'Brakes' },
+            { id: 'brake-rotor', name: 'Brake Rotor', category: 'Brakes' },
+            { id: 'brake-pad', name: 'Brake Pad', category: 'Brakes' },
+            { id: 'master-cylinder', name: 'Master Cylinder', category: 'Brakes' },
+            
+            // EXHAUST & EMISSION
+            { id: 'catalytic-converter', name: 'Catalytic Converter', category: 'Exhaust & Emission' },
+            { id: 'muffler', name: 'Muffler', category: 'Exhaust & Emission' },
+            { id: 'exhaust-pipe', name: 'Exhaust Pipe', category: 'Exhaust & Emission' }
+        ];
+
+        // Function to populate year dropdown
+        function populateYearDropdown() {
+            const yearDropdown = document.getElementById('year');
+            const currentYear = 2025; // Set this to the current year
+            const startYear = 1994;
+            
+            // Clear any existing options except the default one
+            yearDropdown.innerHTML = '<option value="" disabled selected>Select Year</option>';
+            
+            // Add year options
+            for (let year = currentYear; year >= startYear; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearDropdown.appendChild(option);
+            }
+        }
+        
+        // Function to initialize searchable select
+        function initSearchableSelect(inputId, hiddenId, dropdownId, options, onSelect) {
+            const searchInput = document.getElementById(inputId);
+            const hiddenInput = document.getElementById(hiddenId);
+            const dropdown = document.getElementById(dropdownId);
+            
+            // Populate dropdown based on search text
+            function updateDropdown(filterText = '') {
+                dropdown.innerHTML = '';
+                const filtered = options.filter(opt => 
+                    opt.text.toLowerCase().includes(filterText.toLowerCase())
+                );
+                
+                filtered.forEach(opt => {
+                    const item = document.createElement('div');
+                    item.className = 'searchable-dropdown-item';
+                    item.textContent = opt.text;
+                    item.dataset.value = opt.value;
+                    
+                    item.addEventListener('click', () => {
+                        searchInput.value = opt.text;
+                        hiddenInput.value = opt.value;
+                        dropdown.style.display = 'none';
+                        
+                        if (onSelect) {
+                            onSelect(opt.value, opt.text);
+                        }
+                    });
+                    
+                    dropdown.appendChild(item);
+                });
+                
+                dropdown.style.display = filtered.length > 0 ? 'block' : 'none';
+            }
+            
+            // Show dropdown when input is focused
+            searchInput.addEventListener('focus', () => {
+                updateDropdown(searchInput.value);
+            });
+            
+            // Filter dropdown when input changes
+            searchInput.addEventListener('input', () => {
+                updateDropdown(searchInput.value);
+            });
+            
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target !== searchInput && e.target !== dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            });
+            
+            return {
+                updateOptions: (newOptions) => {
+                    options = [...newOptions];
+                    updateDropdown(searchInput.value);
+                },
+                clear: () => {
+                    searchInput.value = '';
+                    hiddenInput.value = '';
+                }
+            };
+        }
+        
+        // Function to initialize parts dropdown
+        function initPartsDropdown() {
+            const partSearchInput = document.getElementById('part-search');
+            const partDropdown = document.getElementById('part-dropdown');
+            const hiddenPartInput = document.getElementById('part');
+            
+            // Convert parts data to dropdown format
+            const partOptions = autoPartsData.map(part => ({
+                value: part.id,
+                text: part.name,
+                category: part.category
+            }));
+            
+            // Group parts by category
+            const partsByCategory = {};
+            partOptions.forEach(part => {
+                if (!partsByCategory[part.category]) {
+                    partsByCategory[part.category] = [];
+                }
+                partsByCategory[part.category].push(part);
+            });
+            
+            // Function to update the dropdown with filtered parts
+            function updatePartDropdown(searchText) {
+                // Clear the dropdown
+                partDropdown.innerHTML = '';
+                
+                // Filter parts by search text
+                searchText = searchText.toLowerCase();
+                
+                // Object to track which categories have matching parts
+                const categoriesWithMatches = {};
+                
+                // Filter and store matches by category
+                for (const category in partsByCategory) {
+                    const matchingParts = partsByCategory[category].filter(part => 
+                        part.text.toLowerCase().includes(searchText) ||
+                        category.toLowerCase().includes(searchText)
+                    );
+                    
+                    if (matchingParts.length > 0) {
+                        categoriesWithMatches[category] = matchingParts;
+                    }
+                }
+                
+                // Add parts to dropdown by category
+                for (const category in categoriesWithMatches) {
+                    // Add category header
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = 'dropdown-category-header';
+                    categoryHeader.textContent = category;
+                    partDropdown.appendChild(categoryHeader);
+                    
+                    // Add parts under this category
+                    categoriesWithMatches[category].forEach(part => {
+                        const item = document.createElement('div');
+                        item.className = 'searchable-dropdown-item';
+                        item.textContent = part.text;
+                        item.dataset.value = part.value;
+                        
+                        item.addEventListener('click', () => {
+                            partSearchInput.value = part.text;
+                            hiddenPartInput.value = part.value;
+                            partDropdown.style.display = 'none';
+                        });
+                        
+                        partDropdown.appendChild(item);
+                    });
+                }
+                
+                // Show dropdown if there are items, otherwise hide it
+                const hasMatches = Object.keys(categoriesWithMatches).length > 0;
+                partDropdown.style.display = hasMatches ? 'block' : 'none';
+            }
+            
+            // Show dropdown when input is focused
+            partSearchInput.addEventListener('focus', () => {
+                updatePartDropdown(partSearchInput.value);
+            });
+            
+            // Filter dropdown when input changes
+            partSearchInput.addEventListener('input', () => {
+                updatePartDropdown(partSearchInput.value);
+            });
+            
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target !== partSearchInput && e.target !== partDropdown) {
+                    partDropdown.style.display = 'none';
+                }
+            });
+        }
+        
+        // Function to fetch all makes
+        async function getAllMakes() {
+          const url = 'https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=json';
+          
+          try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.Results && data.Results.length > 0) {
+              return data.Results;
+            } else {
+              console.error("No makes found");
+              return [];
+            }
+          } catch (error) {
+            console.error("Error fetching makes:", error);
+            return [];
+          }
+        }
+        
+        // Function to fetch models for a specific make
+        async function getModelsForMake(make) {
+          const url = `https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/${make}?format=json`;
+          
+          try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (data.Results && data.Results.length > 0) {
+              return data.Results;
+            } else {
+              console.error(`No models found for make: ${make}`);
+              return [];
+            }
+          } catch (error) {
+            console.error(`Error fetching models for make: ${make}`, error);
+            return [];
+          }
+        }
+        
+        // Initialize the page
+        window.addEventListener("DOMContentLoaded", async () => {
+            // Populate year dropdown
+            populateYearDropdown();
+            
+            // Fetch makes
+            const makes = await getAllMakes();
+            const makeOptions = makes.map(make => ({
+                value: make.Make_Name,
+                text: make.Make_Name
+            }));
+            
+            // Initialize make select
+            const makeSelect = initSearchableSelect(
+                'make-search', 
+                'make', 
+                'make-dropdown', 
+                makeOptions, 
+                async (value) => {
+                    // When make is selected, fetch models
+                    const models = await getModelsForMake(value);
+                    modelSelect.clear();
+                    
+                    // Update model options
+                    const modelOptions = models.map(model => ({
+                        value: model.Model_Name,
+                        text: model.Model_Name
+                    }));
+                    
+                    modelSelect.updateOptions(modelOptions);
+                }
+            );
+            
+            // Initialize model select (initially empty)
+            const modelSelect = initSearchableSelect(
+                'model-search',
+                'model',
+                'model-dropdown',
+                []
+            );
+            
+            // Initialize parts dropdown
+            initPartsDropdown();
+        });
+
+            // Handle VIN Lookup button click
+document.querySelector('.vin-lookup button').addEventListener('click', function() {
+    // Navigate to the VIN lookup page
+    window.location.href = 'vin.html';
+});
+
+// Parse URL parameters on page load to see if we're coming from VIN lookup
+window.addEventListener('load', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const year = urlParams.get('year');
+    const make = urlParams.get('make');
+    const model = urlParams.get('model');
+    
+    // If we have parameters from VIN lookup, fill the form
+    if (year && make && model) {
+        // Set the year dropdown
+        const yearDropdown = document.getElementById('year');
+        if (yearDropdown) {
+            for (let i = 0; i < yearDropdown.options.length; i++) {
+                if (yearDropdown.options[i].value === year) {
+                    yearDropdown.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Set the make and model in searchable inputs
+        const makeSearch = document.getElementById('make-search');
+        const makeHidden = document.getElementById('make');
+        if (makeSearch && makeHidden) {
+            makeSearch.value = make;
+            makeHidden.value = make;
+            
+            // Trigger the make selection to load models
+            const event = new Event('change');
+            makeHidden.dispatchEvent(event);
+            
+            // After a short delay to allow models to load
+            setTimeout(() => {
+                const modelSearch = document.getElementById('model-search');
+                const modelHidden = document.getElementById('model');
+                if (modelSearch && modelHidden) {
+                    modelSearch.value = model;
+                    modelHidden.value = model;
+                }
+            }, 500);
+        }
+    }
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+API used: https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/{VIN}?format=json
+
+## VIN Format Information
+
+A standard VIN consists of 17 characters:
+
+- Characters 1-3: World Manufacturer Identifier (WMI)
+- Characters 4-8: Vehicle Descriptor Section (VDS)
+- Characters 9: Check Digit
+- Characters 10-17: Vehicle Identifier Section (VIS)
+
+## API Response Examples
+
+The NHTSA API typically returns a JSON response with fields including:
+- Make
+- Model
+- ModelYear
+- EngineConfiguration
+- TransmissionStyle
+- BodyClass
+- ErrorCode (should be "0" for successful decode)
+
+## Using VINs for Inventory Testing
+
+When testing with your inventory system, remember that not all fields may be populated by the API. The most reliable fields are:
+- Make
+- Model
+- ModelYear
+
+Other fields like trim level, engine details, and transmission type may vary in availability and format depending on the manufacturer.
+
+Your vin.html file is now ready for production use. The NHTSA API should work reliably for most vehicles in your inventory system, especially US vehicles. Just keep in mind that the API might not return complete information for every field of every vehicle, particularly for:
+
+Very new vehicles (latest model year)
+Some imported vehicles
+Classic/vintage vehicles (pre-1980s)

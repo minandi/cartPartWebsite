@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard - Auto Parts Finder</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .logo a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .logo a:hover {
+            color: var(--secondary-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0;
+        }
+
+        nav li {
+            margin-right: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--secondary-color);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0 20px;
+        }
+
+        .dashboard-title {
+            margin: 0;
+            color: var(--dark-color);
+            font-size: 28px;
+        }
+
+        .add-vehicle-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .add-vehicle-btn:hover {
+            background-color: #219653;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--secondary-color);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .inventory-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--light-color);
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-dismantling {
+            background-color: #f8e5d7;
+            color: #d35400;
+        }
+
+        .status-active {
+            background-color: #d5f5e3;
+            color: #27ae60;
+        }
+
+        .status-sold_out {
+            background-color: #ebdef0;
+            color: #8e44ad;
+        }
+
+        .view-parts-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .view-parts-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .vehicle-details {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        .vehicle-details.show {
+            display: table-row;
+        }
+
+        .parts-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .parts-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .parts-list li:last-child {
+            border-bottom: none;
+        }
+
+        .part-name {
+            font-weight: 500;
+        }
+
+        .part-status {
+            font-size: 14px;
+        }
+
+        .part-available {
+            color: var(--success-color);
+        }
+
+        .part-sold {
+            color: var(--warning-color);
+        }
+
+        .part-damaged {
+            color: var(--accent-color);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            margin: 0 5px;
+            cursor: pointer;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .pagination button.active {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <h1 class="logo"><a href="index.html">Auto Parts Finder</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="inventory.html">Inventory</a></li>
+                    <li><a href="addCar.html">Add Car</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-header">
+            <h2 class="dashboard-title">Inventory Dashboard</h2>
+            <button class="add-vehicle-btn" onclick="window.location.href='addCar.html'">+ Add New Vehicle</button>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <p class="stat-label">Total Vehicles</p>
+                <p class="stat-value" id="total-vehicles">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Available Parts</p>
+                <p class="stat-value" id="available-parts">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Sold Parts</p>
+                <p class="stat-value" id="sold-parts">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-label">Total Revenue</p>
+                <p class="stat-value" id="total-revenue">$0</p>
+            </div>
+        </div>
+
+        <div class="inventory-section">
+            <div class="section-header">
+                <h3 class="section-title">Vehicle Inventory</h3>
+                <div class="search-filter">
+                    <input type="text" id="search-input" placeholder="Search...">
+                    <select id="status-filter">
+                        <option value="all">All Status</option>
+                        <option value="dismantling">Dismantling</option>
+                        <option value="active">Active</option>
+                        <option value="sold_out">Sold Out</option>
+                    </select>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle Info</th>
+                        <th>VIN</th>
+                        <th>Date Added</th>
+                        <th>Status</th>
+                        <th>Available Parts</th>
+                        <th>Sold Parts</th>
+                        <th>Revenue</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicle-table-body">
+                    <!-- Vehicle data will be populated by JavaScript -->
+                </tbody>
+            </table>
+
+            <div class="pagination" id="pagination">
+                <!-- Pagination controls will be added by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Auto Parts Finder. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // API endpoint base URL - change this when deploying
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // DOM Elements
+        const totalVehiclesEl = document.getElementById('total-vehicles');
+        const availablePartsEl = document.getElementById('available-parts');
+        const soldPartsEl = document.getElementById('sold-parts');
+        const totalRevenueEl = document.getElementById('total-revenue');
+        const vehicleTableBodyEl = document.getElementById('vehicle-table-body');
+        const statusFilterEl = document.getElementById('status-filter');
+        const searchInputEl = document.getElementById('search-input');
+        const paginationEl = document.getElementById('pagination');
+
+        // State
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let allVehicles = [];
+        let filteredVehicles = [];
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/dashboard`);
+                if (!response.ok) throw new Error('Failed to load dashboard data');
+
+                const stats = await response.json();
+
+                // Update dashboard elements
+                totalVehiclesEl.textContent = stats.totalVehicles || 0;
+                availablePartsEl.textContent = stats.availableParts || 0;
+                soldPartsEl.textContent = stats.soldParts || 0;
+                totalRevenueEl.textContent = `$${(stats.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                alert('Failed to load dashboard statistics');
+            }
+        }
+
+        // Load vehicles from API
+        async function loadVehicles() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/vehicles`);
+                if (!response.ok) throw new Error('Failed to load vehicles');
+
+                allVehicles = await response.json();
+                filterVehicles();
+            } catch (error) {
+                console.error('Error loading vehicles:', error);
+                alert('Failed to load vehicle inventory');
+            }
+        }
+
+        // Filter vehicles based on search and status filter
+        function filterVehicles() {
+            const searchTerm = searchInputEl.value.toLowerCase();
+            const statusFilter = statusFilterEl.value;
+
+            filteredVehicles = allVehicles.filter(vehicle => {
+                // Apply status filter
+                if (statusFilter !== 'all' && vehicle.status !== statusFilter) {
+                    return false;
+                }
+
+                // Apply search filter
+                if (searchTerm) {
+                    const searchableText = `${vehicle.year} ${vehicle.make} ${vehicle.model} ${vehicle.vin}`.toLowerCase();
+                    if (!searchableText.includes(searchTerm)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Reset to first page when filtering
+            currentPage = 1;
+            renderVehicles();
+        }
+
+        // Render vehicles table
+        function renderVehicles() {
+            // Calculate pagination
+            const totalPages = Math.ceil(filteredVehicles.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentPageVehicles = filteredVehicles.slice(startIndex, endIndex);
+
+            // Clear table
+            vehicleTableBodyEl.innerHTML = '';
+
+            // Add vehicles to table
+            currentPageVehicles.forEach(vehicle => {
+                const tr = document.createElement('tr');
+
+                // Format the vehicle status with the appropriate color class
+                const statusClass =
+                    vehicle.status === 'active' ? 'status-active' :
+                        vehicle.status === 'dismantling' ? 'status-dismantling' :
+                            'status-sold_out';
+
+                tr.innerHTML = `
+                    <td>${vehicle.year} ${vehicle.make} ${vehicle.model}</td>
+                    <td>${vehicle.vin}</td>
+                    <td>${new Date(vehicle.date_added).toLocaleDateString()}</td>
+                    <td><span class="status ${statusClass}">${capitalizeFirstLetter(vehicle.status)}</span></td>
+                    <td>${vehicle.available_parts}</td>
+                    <td>${vehicle.sold_parts}</td>
+                    <td>$${(vehicle.total_revenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>
+                        <button class="view-parts-btn" data-vehicle-id="${vehicle.id}">View Parts</button>
+                    </td>
+                `;
+
+                vehicleTableBodyEl.appendChild(tr);
+            });
+
+            // Render pagination controls
+            renderPagination(totalPages);
+
+            // Add event listeners to view parts buttons
+            document.querySelectorAll('.view-parts-btn').forEach(button => {
+                button.addEventListener('click', () => viewVehicleParts(button.dataset.vehicleId));
+            });
+        }
+
+        // Render pagination controls
+        function renderPagination(totalPages) {
+            paginationEl.innerHTML = '';
+
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '&lt;';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderVehicles();
+                }
+            });
+            paginationEl.appendChild(prevButton);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.className = i === currentPage ? 'active' : '';
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderVehicles();
+                });
+                paginationEl.appendChild(pageButton);
+            }
+
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '&gt;';
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderVehicles();
+                }
+            });
+            paginationEl.appendChild(nextButton);
+        }
+
+        // View parts for a specific vehicle
+        async function viewVehicleParts(vehicleId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/vehicles/${vehicleId}`);
+                if (!response.ok) throw new Error('Failed to load vehicle details');
+
+                const vehicle = await response.json();
+
+                // Check if there's already an expanded row for this vehicle
+                const existingDetailsRow = document.querySelector(`.vehicle-details[data-vehicle-id="${vehicleId}"]`);
+                if (existingDetailsRow) {
+                    // If it exists, just toggle its visibility
+                    existingDetailsRow.classList.toggle('show');
+                    return;
+                }
+
+                // Find the button's row
+                const buttonCell = document.querySelector(`button[data-vehicle-id="${vehicleId}"]`).closest('tr');
+
+                // Create a new row for details
+                const detailsRow = document.createElement('tr');
+                detailsRow.className = 'vehicle-details show';
+                detailsRow.dataset.vehicleId = vehicleId;
+
+                // Group parts by category
+                const partsByCategory = {};
+                vehicle.parts.forEach(part => {
+                    if (!partsByCategory[part.category]) {
+                        partsByCategory[part.category] = [];
+                    }
+                    partsByCategory[part.category].push(part);
+                });
+
+                // Create the details content
+                let detailsHTML = `
+                    <td colspan="8">
+                        <div>
+                            <h4>Parts Inventory - ${vehicle.year} ${vehicle.make} ${vehicle.model}</h4>
+                            <p><strong>Damage Location:</strong> ${vehicle.damage_location}</p>
+                `;
+
+                // Add parts by category
+                for (const category in partsByCategory) {
+                    detailsHTML += `<h5>${category}</h5><ul class="parts-list">`;
+
+                    partsByCategory[category].forEach(part => {
+                        const statusClass =
+                            part.status === 'available' ? 'part-available' :
+                                part.status === 'sold' ? 'part-sold' : 'part-damaged';
+
+                        const statusText = part.status === 'available'
+                            ? `Available - $${part.price}`
+                            : part.status === 'sold'
+                                ? `Sold - $${part.sale_price || part.price}`
+                                : 'Damaged';
+
+                        detailsHTML += `
+                            <li>
+                                <span class="part-name">${part.name}</span>
+                                <span class="part-status ${statusClass}">${statusText}</span>
+                            </li>
+                        `;
+                    });
+
+                    detailsHTML += `</ul>`;
+                }
+
+                detailsHTML += `</div></td>`;
+                detailsRow.innerHTML = detailsHTML;
+
+                // Insert the details row after the button's row
+                buttonCell.parentNode.insertBefore(detailsRow, buttonCell.nextSibling);
+
+            } catch (error) {
+                console.error('Error loading vehicle parts:', error);
+                alert('Failed to load vehicle parts');
+            }
+        }
+
+        // Helper function to capitalize first letter
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load initial data
+            loadDashboardStats();
+            loadVehicles();
+
+            // Set up event listeners for filtering
+            statusFilterEl.addEventListener('change', filterVehicles);
+            searchInputEl.addEventListener('input', filterVehicles);
+        });
+    </script>
+</body>
+
+</html>

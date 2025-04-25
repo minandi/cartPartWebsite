@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Vehicle - Auto Parts Finder</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --border-color: #ddd;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .logo a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .logo a:hover {
+            color: var(--secondary-color);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0;
+        }
+        
+        nav li {
+            margin-right: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            margin: 30px 0;
+            color: var(--dark-color);
+            font-size: 28px;
+            text-align: center;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .vin-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .vin-container input {
+            flex-grow: 1;
+        }
+        
+        .vin-lookup-btn {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            white-space: nowrap;
+        }
+        
+        .submit-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            background-color: #219653;
+        }
+        
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .success-message {
+            display: none;
+            background-color: #d5f5e3;
+            border: 1px solid #27ae60;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .vin-error {
+            color: var(--accent-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <h1 class="logo"><a href="index.html">Auto Parts Finder</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="inventory.html">Inventory</a></li>
+                    <li><a href="addCar.html">Add Car</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <h2 class="page-title">Add New Vehicle to Inventory</h2>
+        
+        <div class="form-container">
+            <form id="add-vehicle-form">
+                <div class="form-group">
+                    <label for="vin">Vehicle Identification Number (VIN)</label>
+                    <div class="vin-container">
+                        <input type="text" id="vin" name="vin" required placeholder="Enter VIN number" maxlength="17">
+                        <button type="button" id="vin-lookup-btn" class="vin-lookup-btn">Lookup</button>
+                    </div>
+                    <div class="vin-error" id="vin-error">Please enter a valid 17-character VIN.</div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="year">Year</label>
+                        <input type="number" id="year" name="year" required min="1900" max="2030">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="make">Make</label>
+                        <input type="text" id="make" name="make" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <input type="text" id="model" name="model" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="purchase-date">Purchase Date</label>
+                        <input type="date" id="purchase-date" name="purchaseDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="purchase-price">Purchase Price ($)</label>
+                        <input type="number" id="purchase-price" name="purchasePrice" required min="0" step="0.01">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="damage-location">Damage Location</label>
+                    <select id="damage-location" name="damageLocation" required>
+                        <option value="" disabled selected>Select damage location</option>
+                        <option value="Front Left">Front Left</option>
+                        <option value="Front Right">Front Right</option>
+                        <option value="Front Center">Front Center</option>
+                        <option value="Rear Left">Rear Left</option>
+                        <option value="Rear Right">Rear Right</option>
+                        <option value="Rear Center">Rear Center</option>
+                        <option value="Left Side">Left Side</option>
+                        <option value="Right Side">Right Side</option>
+                        <option value="Roof">Roof</option>
+                        <option value="Undercarriage">Undercarriage</option>
+                        <option value="Multiple">Multiple Areas</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" placeholder="Enter any additional information about the vehicle"></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn" id="submit-btn">Add Vehicle to Inventory</button>
+            </form>
+            
+            <div class="loading-indicator" id="loading-indicator">
+                <p>Processing... Please wait.</p>
+            </div>
+            
+            <div class="success-message" id="success-message">
+                <p>Vehicle successfully added to inventory!</p>
+                <p>Redirecting to inventory page...</p>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Auto Parts Finder. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // API endpoint base URL - change this when deploying
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // DOM Elements
+        const addVehicleForm = document.getElementById('add-vehicle-form');
+        const vinLookupBtn = document.getElementById('vin-lookup-btn');
+        const vinInput = document.getElementById('vin');
+        const vinError = document.getElementById('vin-error');
+        const yearInput = document.getElementById('year');
+        const makeInput = document.getElementById('make');
+        const modelInput = document.getElementById('model');
+        const purchaseDateInput = document.getElementById('purchase-date');
+        const purchasePriceInput = document.getElementById('purchase-price');
+        const damageLocationSelect = document.getElementById('damage-location');
+        const notesInput = document.getElementById('notes');
+        const submitBtn = document.getElementById('submit-btn');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const successMessage = document.getElementById('success-message');
+
+        // Set default purchase date to today
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        purchaseDateInput.value = formattedDate;
+        
+        // Function to validate VIN
+        function isValidVIN(vin) {
+            // Basic validation: 17 characters, alphanumeric excluding I, O, Q
+            const vinRegex = /^[A-HJ-NPR-Z0-9]{17}$/i;
+            
+            if (!vinRegex.test(vin)) {
+                return false;
+            }
+            
+            // Additional validation - check the VIN checksum (North American VINs)
+            // This is optional but adds an extra layer of validation
+            try {
+                // Weight factors for each position in the VIN
+                const weights = [8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2];
+                
+                // Transliteration values for letters and numbers
+                const transliterationTable = {
+                    'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8,
+                    'J': 1, 'K': 2, 'L': 3, 'M': 4, 'N': 5, 'P': 7, 'R': 9,
+                    'S': 2, 'T': 3, 'U': 4, 'V': 5, 'W': 6, 'X': 7, 'Y': 8, 'Z': 9,
+                    '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '0': 0
+                };
+                
+                // Convert VIN to uppercase for processing
+                vin = vin.toUpperCase();
+                
+                // Calculate the check sum
+                let sum = 0;
+                for (let i = 0; i < 17; i++) {
+                    const char = vin.charAt(i);
+                    const value = transliterationTable[char];
+                    
+                    if (value === undefined) {
+                        return false; // Invalid character in VIN
+                    }
+                    
+                    sum += value * weights[i];
+                }
+                
+                // Calculate the check digit (position 9)
+                const remainder = sum % 11;
+                const checkDigit = remainder === 10 ? 'X' : remainder.toString();
+                
+                // Compare with the actual check digit in the VIN
+                return checkDigit === vin.charAt(8);
+            } catch (e) {
+                // If there's any error in the validation, fall back to basic regex validation
+                return true;
+            }
+        }
+
+        // VIN lookup function using NHTSA API
+        async function lookupVIN() {
+            const vin = vinInput.value.trim().toUpperCase();
+            
+            // Validate VIN format first
+            if (!vin) {
+                vinError.textContent = "Please enter a VIN.";
+                vinError.style.display = 'block';
+                return;
+            }
+            
+            if (!isValidVIN(vin)) {
+                vinError.textContent = "Please enter a valid 17-character VIN.";
+                vinError.style.display = 'block';
+                return;
+            }
+            
+            vinError.style.display = 'none';
+            
+            // Show loading state
+            vinLookupBtn.textContent = 'Looking up...';
+            vinLookupBtn.disabled = true;
+            
+            try {
+                // Call the NHTSA API to decode the VIN
+                const apiUrl = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`;
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Check if we got valid results
+                if (data.Results && data.Results.length > 0) {
+                    const vinData = data.Results[0];
+                    
+                    // Check if there was an error decoding the VIN
+                    if (vinData.ErrorCode && vinData.ErrorCode !== "0") {
+                        throw new Error(`VIN decode error: ${vinData.ErrorText || 'Unknown error'}`);
+                    }
+                    
+                    // Populate form fields with data from API
+                    if (vinData.ModelYear) {
+                        yearInput.value = vinData.ModelYear;
+                    }
+                    
+                    if (vinData.Make) {
+                        makeInput.value = vinData.Make;
+                    }
+                    
+                    if (vinData.Model) {
+                        modelInput.value = vinData.Model;
+                    }
+                } else {
+                    throw new Error('No results returned from VIN decoder');
+                }
+            } catch (error) {
+                console.error('Error looking up VIN:', error);
+                vinError.textContent = `Error looking up VIN: ${error.message}. You can enter vehicle details manually.`;
+                vinError.style.display = 'block';
+            } finally {
+                // Reset button state
+                vinLookupBtn.textContent = 'Lookup';
+                vinLookupBtn.disabled = false;
+            }
+        }
+
+        // Form submission
+        async function submitForm(event) {
+            event.preventDefault();
+            
+            // Validate form
+            const requiredFields = [
+                { field: vinInput, name: 'VIN' },
+                { field: yearInput, name: 'Year' },
+                { field: makeInput, name: 'Make' },
+                { field: modelInput, name: 'Model' },
+                { field: purchaseDateInput, name: 'Purchase Date' },
+                { field: purchasePriceInput, name: 'Purchase Price' },
+                { field: damageLocationSelect, name: 'Damage Location' }
+            ];
+            
+            for (const { field, name } of requiredFields) {
+                if (!field.value.trim()) {
+                    alert(`${name} is required`);
+                    field.focus();
+                    return;
+                }
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            loadingIndicator.style.display = 'block';
+            
+            // Prepare data
+            const vehicleData = {
+                year: parseInt(yearInput.value),
+                make: makeInput.value,
+                model: modelInput.value,
+                vin: vinInput.value,
+                purchaseDate: purchaseDateInput.value,
+                purchasePrice: parseFloat(purchasePriceInput.value),
+                damageLocation: damageLocationSelect.value,
+                notes: notesInput.value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/vehicles`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(vehicleData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to add vehicle');
+                }
+                
+                const result = await response.json();
+                
+                // Show success message
+                successMessage.style.display = 'block';
+                
+                // Reset form
+                addVehicleForm.reset();
+                purchaseDateInput.value = formattedDate; // Reset date to today
+                
+                // Redirect to inventory page after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'inventory.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error adding vehicle:', error);
+                alert(`Failed to add vehicle: ${error.message}`);
+            } finally {
+                // Reset UI
+                submitBtn.disabled = false;
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add VIN lookup event listener
+            vinLookupBtn.addEventListener('click', lookupVIN);
+            
+            // Add form submission event listener
+            addVehicleForm.addEventListener('submit', submitForm);
+            
+            // Also add event listener for VIN input to clear error message
+            vinInput.addEventListener('input', () => {
+                vinError.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

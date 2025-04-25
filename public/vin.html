@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Parts Finder - VIN Lookup</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Style for the logo */
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        /* Style for the link inside the logo */
+        .logo a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        /* Optional: style for hover state */
+        .logo a:hover {
+            color: var(--secondary-color);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0;
+        }
+        
+        nav li {
+            margin-right: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .search-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 16px;
+        }
+        
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .search-btn {
+            grid-column: 1 / -1;
+        }
+        
+        .toggle-search-mode {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .toggle-button {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s, color 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .toggle-button img {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .toggle-button:hover {
+            background-color: #dde4e6;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+        
+        .vin-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid var(--secondary-color);
+            display: none;
+        }
+        
+        .vin-info.show {
+            display: block;
+        }
+        
+        .vin-info h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .vin-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .vin-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .vin-error {
+            color: var(--accent-color);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .verification-message {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            background-color: #f0f7fa;
+            border-left: 3px solid var(--secondary-color);
+            border-radius: 2px;
+        }
+        
+        /* Styles for the parts selection section */
+        .parts-selection h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <h1 class="logo"><a href="index.html">Auto Parts Finder</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="inventory.html">Inventory</a></li>
+                    <li><a href="addCar.html">Add Car</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="search-container">
+            <h2 class="search-title">Find Parts By VIN</h2>
+            
+            <!-- VIN Lookup Form -->
+            <form id="vin-form" class="search-form">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="vin-input">Enter Vehicle Identification Number (VIN)</label>
+                    <input type="text" id="vin-input" name="vin" 
+                           placeholder="e.g. 1HGCV1F18KA012345" 
+                           maxlength="17" required>
+                    <div class="vin-error" id="vin-error">Please enter a valid 17-character VIN.</div>
+                </div>
+                
+                <div class="search-btn">
+                    <button type="submit" class="btn" id="lookup-btn">Lookup VIN</button>
+                </div>
+            </form>
+            
+            <!-- VIN Information Display (Hidden initially) -->
+            <div class="vin-info" id="vin-info">
+                <h3>Vehicle Information</h3>
+                <p class="verification-message">Please verify this is the correct vehicle:</p>
+                <div class="vin-info-grid">
+                    <p><strong>Make:</strong> <span id="vin-make"></span></p>
+                    <p><strong>Model:</strong> <span id="vin-model"></span></p>
+                    <p><strong>Year:</strong> <span id="vin-year"></span></p>
+                    <p><strong>Engine:</strong> <span id="vin-engine"></span></p>
+                    <p><strong>Transmission:</strong> <span id="vin-transmission"></span></p>
+                    <p><strong>Body Style:</strong> <span id="vin-body"></span></p>
+                </div>
+                <div class="search-btn" style="margin-top: 15px;">
+                    <button type="button" class="btn" id="confirm-vehicle-btn">Confirm Vehicle</button>
+                </div>
+            </div>
+            
+            <!-- Parts Selection (Hidden initially) -->
+            <div class="parts-selection" id="parts-selection" style="display: none; margin-top: 25px;">
+                <h3>Select Part for This Vehicle</h3>
+                <div class="form-group">
+                    <label for="part-category">Part Category</label>
+                    <select id="part-category" name="part-category">
+                        <option value="" disabled selected>Select Category</option>
+                        <option value="body">Body Parts</option>
+                        <option value="lighting">Lighting & Electrical</option>
+                        <option value="engine">Engine</option>
+                        <option value="transmission">Transmission & Drivetrain</option>
+                        <option value="interior">Interior</option>
+                        <option value="suspension">Suspension & Steering</option>
+                        <option value="brakes">Brakes</option>
+                        <option value="exhaust">Exhaust & Emission</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="part-subcategory-container" style="display: none;">
+                    <label for="part-subcategory">Select Part</label>
+                    <select id="part-subcategory" name="part-subcategory">
+                        <option value="" disabled selected>Select Part</option>
+                        <!-- Will be populated based on category selection -->
+                    </select>
+                </div>
+                
+                <div class="search-btn" style="margin-top: 15px;">
+                    <button type="button" class="btn" id="search-parts-btn">Check Availability</button>
+                </div>
+            </div>
+            
+            <div class="toggle-search-mode">
+                <button class="toggle-button" id="toggle-search-mode">
+                    Switch to Manual Entry
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Auto Parts Finder. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const vinForm = document.getElementById('vin-form');
+            const vinInput = document.getElementById('vin-input');
+            const vinError = document.getElementById('vin-error');
+            const vinInfo = document.getElementById('vin-info');
+            const partsSelection = document.getElementById('parts-selection');
+            const toggleButton = document.getElementById('toggle-search-mode');
+            const confirmVehicleBtn = document.getElementById('confirm-vehicle-btn');
+            const searchPartsBtn = document.getElementById('search-parts-btn');
+            const partCategorySelect = document.getElementById('part-category');
+            const partSubcategoryContainer = document.getElementById('part-subcategory-container');
+            const partSubcategorySelect = document.getElementById('part-subcategory');
+            
+            // Part subcategories data - this would typically come from your database
+            const partSubcategories = {
+                'body': [
+                    { id: 'bumper-front', name: 'Bumper (Front)' },
+                    { id: 'bumper-rear', name: 'Bumper (Rear)' },
+                    { id: 'door-front-left', name: 'Door (Front Left)' },
+                    { id: 'door-front-right', name: 'Door (Front Right)' },
+                    { id: 'door-rear-left', name: 'Door (Rear Left)' },
+                    { id: 'door-rear-right', name: 'Door (Rear Right)' },
+                    { id: 'fender-left', name: 'Fender (Left)' },
+                    { id: 'fender-right', name: 'Fender (Right)' },
+                    { id: 'hood', name: 'Hood' },
+                    { id: 'trunk-lid', name: 'Trunk Lid' }
+                ],
+                'lighting': [
+                    { id: 'headlight-left', name: 'Headlight (Left)' },
+                    { id: 'headlight-right', name: 'Headlight (Right)' },
+                    { id: 'taillight-left', name: 'Taillight (Left)' },
+                    { id: 'taillight-right', name: 'Taillight (Right)' }
+                ],
+                'engine': [
+                    { id: 'engine-complete', name: 'Complete Engine' },
+                    { id: 'engine-block', name: 'Engine Block' },
+                    { id: 'cylinder-head', name: 'Cylinder Head' },
+                    { id: 'intake-manifold', name: 'Intake Manifold' },
+                    { id: 'exhaust-manifold', name: 'Exhaust Manifold' }
+                ],
+                'transmission': [
+                    { id: 'transmission-auto', name: 'Automatic Transmission' },
+                    { id: 'transmission-manual', name: 'Manual Transmission' },
+                    { id: 'transfer-case', name: 'Transfer Case' },
+                    { id: 'differential', name: 'Differential' }
+                ],
+                'interior': [
+                    { id: 'seat-front-left', name: 'Seat (Front Left)' },
+                    { id: 'seat-front-right', name: 'Seat (Front Right)' },
+                    { id: 'seat-rear', name: 'Seat (Rear)' },
+                    { id: 'dashboard', name: 'Dashboard' },
+                    { id: 'radio', name: 'Radio/Stereo' }
+                ],
+                'suspension': [
+                    { id: 'strut-front-left', name: 'Strut (Front Left)' },
+                    { id: 'strut-front-right', name: 'Strut (Front Right)' },
+                    { id: 'control-arm', name: 'Control Arm' },
+                    { id: 'steering-rack', name: 'Steering Rack & Pinion' }
+                ],
+                'brakes': [
+                    { id: 'caliper-front', name: 'Brake Caliper (Front)' },
+                    { id: 'caliper-rear', name: 'Brake Caliper (Rear)' },
+                    { id: 'rotor-front', name: 'Brake Rotor (Front)' },
+                    { id: 'rotor-rear', name: 'Brake Rotor (Rear)' }
+                ],
+                'exhaust': [
+                    { id: 'catalytic-converter', name: 'Catalytic Converter' },
+                    { id: 'muffler', name: 'Muffler' },
+                    { id: 'exhaust-pipe', name: 'Exhaust Pipe' }
+                ]
+            };
+            
+            // Function to validate VIN
+            function isValidVIN(vin) {
+                // Basic validation: 17 characters, alphanumeric excluding I, O, Q
+                const vinRegex = /^[A-HJ-NPR-Z0-9]{17}$/i;
+                
+                if (!vinRegex.test(vin)) {
+                    return false;
+                }
+                
+                // Additional validation - check the VIN checksum (North American VINs)
+                // This is optional but adds an extra layer of validation
+                try {
+                    // Weight factors for each position in the VIN
+                    const weights = [8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2];
+                    
+                    // Transliteration values for letters and numbers
+                    const transliterationTable = {
+                        'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8,
+                        'J': 1, 'K': 2, 'L': 3, 'M': 4, 'N': 5, 'P': 7, 'R': 9,
+                        'S': 2, 'T': 3, 'U': 4, 'V': 5, 'W': 6, 'X': 7, 'Y': 8, 'Z': 9,
+                        '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '0': 0
+                    };
+                    
+                    // Convert VIN to uppercase for processing
+                    vin = vin.toUpperCase();
+                    
+                    // Calculate the check sum
+                    let sum = 0;
+                    for (let i = 0; i < 17; i++) {
+                        const char = vin.charAt(i);
+                        const value = transliterationTable[char];
+                        
+                        if (value === undefined) {
+                            return false; // Invalid character in VIN
+                        }
+                        
+                        sum += value * weights[i];
+                    }
+                    
+                    // Calculate the check digit (position 9)
+                    const remainder = sum % 11;
+                    const checkDigit = remainder === 10 ? 'X' : remainder.toString();
+                    
+                    // Compare with the actual check digit in the VIN
+                    return checkDigit === vin.charAt(8);
+                } catch (e) {
+                    // If there's any error in the validation, fall back to basic regex validation
+                    return true;
+                }
+            }
+            
+            // VIN lookup form submission
+            vinForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const vin = vinInput.value.trim().toUpperCase();
+                
+                if (!isValidVIN(vin)) {
+                    vinError.style.display = 'block';
+                    return;
+                }
+                
+                vinError.style.display = 'none';
+                
+                // Call VIN lookup function
+                lookupVIN(vin);
+            });
+            
+            
+            // Function to perform VIN lookup
+            async function lookupVIN(vin) {
+                try {
+                    // Update button to show loading state
+                    const lookupBtn = document.getElementById('lookup-btn');
+                    lookupBtn.textContent = 'Looking up...';
+                    lookupBtn.disabled = true;
+                    
+                    // Call the NHTSA API to decode the VIN
+                    const apiUrl = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`;
+                    const response = await fetch(apiUrl);
+                    
+                    if (!response.ok) {
+                        throw new Error(`API request failed with status ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Check if we got valid results
+                    if (data.Results && data.Results.length > 0) {
+                        const vinData = data.Results[0];
+                        
+                        // Check if there was an error decoding the VIN
+                        if (vinData.ErrorCode && vinData.ErrorCode !== "0") {
+                            throw new Error(`VIN decode error: ${vinData.ErrorText || 'Unknown error'}`);
+                        }
+                        
+                        // Display the VIN data
+                        document.getElementById('vin-make').textContent = vinData.Make || 'Not available';
+                        document.getElementById('vin-model').textContent = vinData.Model || 'Not available';
+                        document.getElementById('vin-year').textContent = vinData.ModelYear || 'Not available';
+                        document.getElementById('vin-engine').textContent = 
+                            `${vinData.EngineConfiguration || ''} ${vinData.DisplacementL || ''} L`.trim() || 'Not available';
+                        document.getElementById('vin-transmission').textContent = vinData.TransmissionStyle || 'Not available';
+                        document.getElementById('vin-body').textContent = vinData.BodyClass || 'Not available';
+                        
+                        // Show the VIN info section
+                        document.getElementById('vin-info').classList.add('show');
+                    } else {
+                        throw new Error('No results returned from VIN decoder');
+                    }
+                } catch (error) {
+                    console.error('Error looking up VIN:', error);
+                    alert(`There was an error looking up this VIN: ${error.message}. Please try again.`);
+                } finally {
+                    // Reset button state
+                    const lookupBtn = document.getElementById('lookup-btn');
+                    lookupBtn.textContent = 'Lookup VIN';
+                    lookupBtn.disabled = false;
+                }
+            }
+            
+            // Confirm vehicle button click
+            confirmVehicleBtn.addEventListener('click', function() {
+                // Hide the confirm button
+                confirmVehicleBtn.style.display = 'none';
+                
+                // Show the parts selection section
+                partsSelection.style.display = 'block';
+                
+                // Scroll to the parts selection section
+                partsSelection.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Part category selection change
+            partCategorySelect.addEventListener('change', function() {
+                const category = this.value;
+                
+                // Clear the subcategory dropdown
+                partSubcategorySelect.innerHTML = '<option value="" disabled selected>Select Part</option>';
+                
+                // If we have subcategories for this category
+                if (partSubcategories[category]) {
+                    // Populate the subcategory dropdown
+                    partSubcategories[category].forEach(part => {
+                        const option = document.createElement('option');
+                        option.value = part.id;
+                        option.textContent = part.name;
+                        partSubcategorySelect.appendChild(option);
+                    });
+                    
+                    // Show the subcategory dropdown
+                    partSubcategoryContainer.style.display = 'block';
+                } else {
+                    // Hide the subcategory dropdown if no subcategories
+                    partSubcategoryContainer.style.display = 'none';
+                }
+            });
+            
+            // Search parts button click
+            searchPartsBtn.addEventListener('click', function() {
+                const make = document.getElementById('vin-make').textContent;
+                const model = document.getElementById('vin-model').textContent;
+                const year = document.getElementById('vin-year').textContent;
+                const category = partCategorySelect.value;
+                const part = partSubcategorySelect.value;
+                
+                if (!category) {
+                    alert('Please select a part category');
+                    return;
+                }
+                
+                if (partSubcategoryContainer.style.display !== 'none' && !part) {
+                    alert('Please select a specific part');
+                    return;
+                }
+                
+                // In a real implementation, you would check availability in your inventory database
+                // For now, simulate this with a confirmation message
+                alert(`Checking inventory for ${year} ${make} ${model} - ${partSubcategorySelect.options[partSubcategorySelect.selectedIndex].text}`);
+                
+                // In a real implementation, this would redirect to an inventory results page
+                // window.location.href = `inventory-results.html?year=${year}&make=${make}&model=${model}&part=${part}`;
+            });
+            
+            // Toggle between VIN lookup and manual entry
+            toggleButton.addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+            
+            // Reset form on page load
+            vinForm.reset();
+        });
+    </script>
+</body>
+</html>

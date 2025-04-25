@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact & Feedback - Auto Parts Finder</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Style for the logo */
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        /* Style for the link inside the logo */
+        .logo a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        /* Optional: style for hover state */
+        .logo a:hover {
+            color: var(--secondary-color);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0;
+        }
+        
+        nav li {
+            margin-right: 20px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .contact-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .contact-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+        }
+        
+        .contact-intro {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .contact-form {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                justify-content: center;
+                margin-top: 15px;
+            }
+            
+            nav li {
+                margin: 0 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-content">
+            <h1 class="logo"><a href="index.html">Auto Parts Finder</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="inventory.html">Inventory</a></li>
+                    <li><a href="addCar.html">Add Car</a></li>    
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="contact-container">
+            <h2 class="contact-title">Employee Feedback & Support</h2>
+            <p class="contact-intro">
+                Use this form to report issues with the website, suggest improvements, or request new features. 
+                Your feedback helps us make the system better for everyone.
+            </p>
+            
+            <div class="success-message" id="success-message">
+                Thank you for your feedback! Your submission has been received and will be reviewed by our team.
+            </div>
+            
+            <div class="error-message" id="error-message">
+                There was a problem submitting your feedback. Please try again or contact the IT department directly.
+            </div>
+            
+            <form class="contact-form" id="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                <input type="hidden" name="access_key" value="a496a574-67d4-4f64-9cbf-e4ebc21e7f53">
+                <input type="hidden" name="subject" value="New feedback from Auto Parts Finder">
+                <input type="hidden" name="redirect" value="thankyou.html">
+                
+                <!-- Honeypot field to prevent spam -->
+                <input type="checkbox" name="botcheck" style="display: none;">
+                
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Your Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department" name="department" required>
+                        <option value="" disabled selected>Select your department</option>
+                        <option value="dismantling">Dismantling</option>
+                        <option value="inventory">Inventory Management</option>
+                        <option value="sales">Sales</option>
+                        <option value="shipping">Shipping</option>
+                        <option value="admin">Administration</option>
+                        <option value="it">IT</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedback-type">Feedback Type</label>
+                    <select id="feedback-type" name="feedbackType" required>
+                        <option value="" disabled selected>Select feedback type</option>
+                        <option value="bug">Bug Report</option>
+                        <option value="suggestion">Feature Suggestion</option>
+                        <option value="improvement">Improvement Idea</option>
+                        <option value="question">Question</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Details</label>
+                    <textarea id="message" name="message" required placeholder="Please provide as much detail as possible. Include steps to reproduce issues, or details about your suggested improvement."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority" required>
+                        <option value="low">Low - Not urgent</option>
+                        <option value="medium" selected>Medium - Needs attention</option>
+                        <option value="high">High - Important issue</option>
+                        <option value="critical">Critical - System down/major issue</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn" id="submit-btn">Submit Feedback</button>
+            </form>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Auto Parts Finder. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactForm = document.getElementById('contact-form');
+            const successMessage = document.getElementById('success-message');
+            const errorMessage = document.getElementById('error-message');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            // Add loading state to button when form is submitted
+            contactForm.addEventListener('submit', function(e) {
+                // Don't prevent default - let the form submit normally
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+                
+                // The form will be submitted to Web3Forms and redirected to thankyou.html
+                // This code is just for visual feedback during submission
+            });
+        });
+    </script>
+</body>
+</html>
